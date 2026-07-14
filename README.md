@@ -2,7 +2,12 @@
 ### Authentic Korean Beauty Aesthetics & Skincare Store
 
 <p align="center">
-  <video src="آدرس_ویدیو_یا_گیف_شما" width="100%" controls autoplay loop muted></video>
+  <img src="https://github.com/user-attachments/assets/3f02fa76-c913-4e48-912f-b9b8a9994124" width="100%" alt="Main page">
+  <br><br>
+  <img src="https://github.com/user-attachments/assets/7e2758f5-3ae9-4923-8e26-071a837cbbc4" width="100%" alt="Main page">
+  <br><br>
+    <img src="https://github.com/user-attachments/assets/da27ae6e-c4e9-49f3-8e1e-625aebeb2e38" width="100%" alt="Main page">
+
 </p>
 
 SuriK-Glow is a modern, responsive web application dedicated to showcasing and retailing authentic Korean skincare and beauty products. It features a curated selection of famous K-Beauty brands, interactive product details, and a dynamic shopping cart experience.
@@ -29,13 +34,11 @@ SuriK-Glow is a modern, responsive web application dedicated to showcasing and r
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/SuriK-Glow.git](https://github.com/YOUR_USERNAME/SuriK-Glow.git)
-   cd SuriK-Glow
+   git clone [https://github.com/solda-rasam/korean-skincare-website.git](https://github.com/solda-rasam/korean-skincare-website.git)
+   cd korean-skincare-website
 
-```
  2. **Run the Application:**
    ```bash
    python app.py
    
-   ```
    Open http://127.0.0.1:5000 in your web browser.
