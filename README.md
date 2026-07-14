@@ -33,13 +33,14 @@ SuriK-Glow is a modern, responsive web application dedicated to showcasing and r
 ## 🚀 How to Run Locally
 
 1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/solda-rasam/korean-skincare-website.git](https://github.com/solda-rasam/korean-skincare-website.git)
-   cd korean-skincare-website
+```bash
+git clone [https://github.com/solda-rasam/korean-skincare-website.git](https://github.com/solda-rasam/korean-skincare-website.git)
+cd korean-skincare-website
 
- 2. **Run the Application:**
-  ```bash
-  python app.py
 ```
+ 2. **Run the Application:**
+```bash
+python app.py
 
-   Open http://127.0.0.1:5000 in your web browser.
+```
+Open http://127.0.0.1:5000 in your web browser.
