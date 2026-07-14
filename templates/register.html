@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuriK-Glow | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white/80 backdrop-blur-md p-10 rounded-3xl shadow-sm border border-stone-200/50 w-full max-w-md text-center">
+        
+        <h1 class="text-3xl font-serif text-stone-850 tracking-wide mb-1">SuriK-Glow</h1>
+        <p class="text-[10px] uppercase tracking-widest text-stone-400 mb-8 font-semibold">Create New Account</p>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="bg-rose-50 text-rose-600 p-3 rounded-xl mb-6 text-xs text-center border border-rose-100">
+                {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="space-y-5 text-left">
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-stone-400 mb-1.5 font-bold">Choose Username</label>
+                <input type="text" name="username" required class="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 bg-stone-50 text-xs">
+            </div>
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest text-stone-400 mb-1.5 font-bold">Choose Password</label>
+                <input type="password" name="password" required class="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-stone-300 bg-stone-50 text-xs">
+            </div>
+            
+            <button type="submit" class="w-full bg-[#8E869E] text-white py-3 rounded-xl hover:bg-[#7D758C] transition text-xs uppercase tracking-widest font-bold mt-4">
+                Register Account
+            </button>
+        </form>
+
+        <div class="text-center mt-6 space-y-3">
+            <p class="text-[11px] text-stone-400">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" class="text-[#8E869E] font-bold hover:underline">Log in here</a>
+            </p>
+            <hr class="border-stone-100">
+            <a href="{{ url_for('home') }}" class="inline-block text-[10px] text-stone-400 hover:text-stone-600 transition uppercase tracking-wider font-semibold">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>

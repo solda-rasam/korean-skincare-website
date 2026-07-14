@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuriK-Glow | Korean Beauty Aesthetics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        /* Custom scrollbar for aesthetic look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased">
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div id="flash-banner" class="bg-amber-100 text-amber-800 text-center py-2 text-xs font-semibold tracking-wide transition duration-500 relative z-50">
+            {{ messages[0] }}
+            <button onclick="document.getElementById('flash-banner').remove()" class="absolute right-4 top-1.5 text-amber-950 font-bold text-sm">×</button>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <header class="border-b border-stone-100 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="/" class="text-2xl font-serif tracking-wider text-stone-850">SuriK-Glow</a>
+            
+            <nav class="hidden md:flex items-center gap-8 text-xs font-semibold tracking-widest uppercase text-stone-400">
+                <a href="#" class="text-stone-900 transition">Home</a>
+                
+                <div class="relative group">
+                    <button class="hover:text-stone-900 transition flex items-center gap-1 uppercase">
+                        Categories <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-48 bg-white border border-stone-100 rounded-xl shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                        <button onclick="filterCategory('all')" class="w-full text-left px-4 py-2 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-semibold">All K-Beauty</button>
+                        <button onclick="filterCategory('skincare')" class="w-full text-left px-4 py-2 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-semibold">Skincare</button>
+                        <button onclick="filterCategory('makeup')" class="w-full text-left px-4 py-2 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-semibold">Makeup</button>
+                        <button onclick="filterCategory('haircare')" class="w-full text-left px-4 py-2 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-semibold">Haircare</button>
+                        <button onclick="filterCategory('perfume')" class="w-full text-left px-4 py-2 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900 font-semibold">Perfume</button>
+                    </div>
+                </div>
+
+                <a href="#brands-section" class="hover:text-stone-900 transition">Famous Brands</a>
+                <a href="#about-section" class="hover:text-stone-900 transition">Our Philosophy</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <button onclick="toggleCart()" class="relative p-2 text-stone-600 hover:text-stone-900 transition">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                </button>
+
+                {% if username %}
+                    <div class="flex items-center gap-3">
+                        <span class="hidden sm:inline text-xs bg-stone-100 text-stone-700 px-3.5 py-2 rounded-full font-semibold">Hello, {{ username }}</span>
+                        {% if is_admin %}
+                            <a href="{{ url_for('dashboard') }}" class="text-xs bg-[#8E869E] text-white px-4 py-2 rounded-full hover:bg-[#7D758C] transition font-medium">Dashboard</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}" class="text-xs border border-stone-200 text-stone-500 px-4 py-2 rounded-full hover:bg-stone-100 transition font-medium">Logout</a>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="text-xs text-stone-500 hover:text-stone-900 font-semibold uppercase tracking-wider px-3">Login</a>
+                    <a href="{{ url_for('register') }}" class="bg-stone-900 text-white px-5 py-2.5 rounded-full text-xs hover:bg-stone-850 transition font-medium uppercase tracking-wider">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col border-l border-stone-100">
+        <div class="p-6 border-b border-stone-100 flex items-center justify-between">
+            <h3 class="text-lg font-serif text-stone-900 flex items-center gap-2">
+                <i class="fa-solid fa-bag-shopping"></i> Your Shopping Bag
+            </h3>
+            <button onclick="toggleCart()" class="text-stone-400 hover:text-stone-900 text-xl font-bold">×</button>
+        </div>
+        
+        <div id="cart-items-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <div class="text-center py-12 text-stone-400 space-y-2">
+                <i class="fa-regular fa-folder-open text-3xl"></i>
+                <p class="text-xs">Your shopping bag is empty.</p>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-stone-100 bg-stone-50 space-y-4">
+            <div class="flex items-center justify-between text-sm font-semibold">
+                <span class="text-stone-500">Subtotal</span>
+                <span id="cart-total" class="text-stone-900">$0.00</span>
+            </div>
+            <button onclick="checkoutOrder()" class="w-full bg-stone-900 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-stone-850 transition">
+                Place Order Securely
+            </button>
+        </div>
+    </div>
+    <div id="cart-overlay" onclick="toggleCart()" class="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 hidden"></div>
+
+    <!-- HERO SECTION WITH NEW IMAGE -->
+    <section class="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+            <span class="text-xs uppercase tracking-widest text-amber-600 font-bold">Premium Curation</span>
+            <h1 class="text-4xl md:text-5xl font-serif text-stone-900 leading-tight">The Secret to Eternal Glow, Korean Style</h1>
+            <p class="text-stone-500 leading-relaxed text-sm">Discover and experience the absolute finest in authentic Korean skincare, makeup, and niche perfumes at SuriK-Glow. Tailored specifically for your daily skincare ritual.</p>
+            <div class="pt-2">
+                <a href="#products-section" class="bg-stone-900 text-white px-8 py-3.5 rounded-full hover:bg-stone-850 transition text-xs uppercase tracking-widest font-bold">Explore Collection</a>
+            </div>
+        </div>
+        <!-- Updated Hero Image Container -->
+        <div class="rounded-3xl h-96 overflow-hidden border border-stone-200/40 relative group shadow-sm">
+            <img src="{{ url_for('static', filename='images/hero.jpg') }}" 
+                 alt="SuriK-Glow Aesthetic Store" 
+                 class="w-full h-full object-cover object-center transition duration-700 group-hover:scale-105">
+            <!-- Smooth overlay for cohesive branding -->
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/20 via-transparent to-transparent pointer-events-none"></div>
+        </div>
+    </section>
+
+    <section id="brands-section" class="max-w-7xl mx-auto px-6 py-10 border-t border-stone-100">
+        <div class="text-center mb-8">
+            <span class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Authorized Retailer</span>
+            <h2 class="text-xl font-serif text-stone-850 mt-1">Discover Famous Seoul Brands</h2>
+        </div>
+        <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+            <button onclick="showBrandInfo('Beauty of Joseon')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-amber-600 hover:shadow-xs transition">Beauty of Joseon</button>
+            <button onclick="showBrandInfo('COSRX')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-stone-600 hover:shadow-xs transition">COSRX</button>
+            <button onclick="showBrandInfo('Laneige')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-pink-600 hover:shadow-xs transition">Laneige</button>
+            <button onclick="showBrandInfo('Anua')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-emerald-600 hover:shadow-xs transition">Anua</button>
+            <button onclick="showBrandInfo('Tamburins')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-stone-900 hover:shadow-xs transition">Tamburins</button>
+            <button onclick="showBrandInfo('Rom&nd')" class="bg-white border border-stone-200/60 px-6 py-3 rounded-2xl text-xs font-serif font-bold tracking-wide hover:border-rose-500 hover:shadow-xs transition">Rom&nd</button>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-6 py-12 border-t border-stone-100">
+        <div class="mb-8">
+            <span class="text-xs uppercase tracking-widest text-amber-600 font-bold">Highly Requested</span>
+            <h2 class="text-3xl font-serif text-stone-900 mt-1">SuriK-Glow Hot Picks</h2>
+        </div>
+        <div id="bestsellers-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+    </section>
+
+    <section id="products-section" class="max-w-7xl mx-auto px-6 py-12 border-t border-stone-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <h2 class="text-3xl font-serif text-stone-900">Explore Complete Catalog</h2>
+                <p class="text-stone-400 text-xs mt-1">Refine and filter by specialized product categories</p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-wider" id="category-filters">
+                <button onclick="filterCategory('all')" class="category-btn active px-4 py-2.5 rounded-full bg-stone-900 text-white transition">All Products</button>
+                <button onclick="filterCategory('skincare')" class="category-btn px-4 py-2.5 rounded-full bg-white text-stone-500 border border-stone-200 hover:bg-stone-50 transition">Skincare</button>
+                <button onclick="filterCategory('makeup')" class="category-btn px-4 py-2.5 rounded-full bg-white text-stone-500 border border-stone-200 hover:bg-stone-50 transition">Makeup</button>
+                <button onclick="filterCategory('haircare')" class="category-btn px-4 py-2.5 rounded-full bg-white text-stone-500 border border-stone-200 hover:bg-stone-50 transition">Haircare</button>
+                <button onclick="filterCategory('perfume')" class="category-btn px-4 py-2.5 rounded-full bg-white text-stone-500 border border-stone-200 hover:bg-stone-50 transition">Perfume</button>
+            </div>
+        </div>
+
+        <div id="products-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-12 text-stone-400">
+                <i class="fa-solid fa-circle-notch animate-spin text-2xl mb-2"></i>
+                <p class="text-xs">Loading K-Beauty collection...</p>
+            </div>
+        </div>
+    </section>
+
+    <div id="details-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-8 relative shadow-2xl border border-stone-100 flex flex-col md:flex-row gap-6 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeDetailsModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-950 text-2xl font-bold">×</button>
+            
+            <div id="modal-left" class="w-full md:w-1/2 flex flex-col justify-between">
+                <div id="modal-visual" class="w-full h-56 rounded-2xl flex items-center justify-center relative overflow-hidden bg-stone-100">
+                    <!-- تگ عکس واقعی جدید اضافه شده 👇 -->
+                    <img id="modal-product-img" src="" alt="Product Image" class="w-full h-full object-cover object-center hidden">
+                    <i id="modal-icon" class="fa-solid text-5xl"></i>
+                    <span id="modal-bestseller-badge" class="absolute bottom-2 left-2 bg-stone-900 text-white text-[9px] px-2 py-0.5 rounded-md font-bold tracking-widest hidden">BESTSELLER</span>
+                </div>
+                <div class="pt-4 flex items-center justify-between border-t border-stone-100 mt-4">
+                    <span id="modal-price" class="text-stone-900 font-bold text-xl"></span>
+                    <button id="modal-add-btn" class="bg-stone-900 text-white px-5 py-2.5 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">Add to Bag</button>
+                </div>
+            </div>
+
+            <div id="modal-right" class="w-full md:w-1/2 space-y-4 text-left">
+                <div>
+                    <span id="modal-brand" class="text-[10px] uppercase tracking-widest text-stone-400 font-bold"></span>
+                    <h3 id="modal-name" class="text-xl font-serif text-stone-850 mt-1"></h3>
+                    <div id="modal-stars" class="flex items-center gap-0.5 mt-1"></div>
+                </div>
+
+                <div class="space-y-3 pt-2 text-xs">
+                    <div>
+                        <h4 class="font-bold text-stone-800">Ideal For:</h4>
+                        <p id="modal-ideal" class="text-stone-500"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-stone-800">Key Benefits:</h4>
+                        <p id="modal-benefits" class="text-stone-500"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-stone-800">Ingredients:</h4>
+                        <p id="modal-ingredients" class="text-stone-500 bg-stone-50 p-2.5 rounded-lg border border-stone-100 leading-relaxed max-h-24 overflow-y-auto"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="brand-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 relative shadow-2xl border border-stone-100 text-center space-y-4">
+            <button onclick="closeBrandModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-950 text-2xl font-bold">×</button>
+            <i class="fa-solid fa-ribbon text-4xl text-amber-600"></i>
+            <h3 id="brand-title" class="text-2xl font-serif text-stone-850"></h3>
+            <p id="brand-desc" class="text-stone-500 text-sm leading-relaxed"></p>
+            <div class="pt-4">
+                <button onclick="closeBrandModal()" class="bg-stone-900 text-white px-6 py-2 rounded-xl text-xs uppercase tracking-widest font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="about-section" class="bg-stone-900 text-stone-400 py-12 mt-16 border-t border-stone-850">
+        <div class="max-w-7xl mx-auto px-6 text-center space-y-4">
+            <h3 class="text-white font-serif text-xl tracking-wider">SuriK-Glow</h3>
+            <p class="text-xs max-w-md mx-auto leading-relaxed text-stone-500">Your premium destination for authentic imports direct from the top cosmetic and luxury fragrance houses of Seoul, South Korea.</p>
+            <p class="text-[10px] text-stone-600 pt-6 uppercase tracking-widest font-semibold">© 2026 SuriK-Glow. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let allProducts = [];
+        let activeCategory = 'all';
+        let cart = [];
+
+        // Brand Descriptions Database Lookup
+        const brandDescriptions = {
+            "Beauty of Joseon": "Inspired by the royal courts of the Joseon Dynasty, this brand modernizes traditional Korean herbal ingredients (Hanbang) like Ginseng and Rice to create clean, glowing, and balanced skin profiles.",
+            "COSRX": "Focusing on highly functional dermatological products, COSRX provides straightforward, minimalistic, and deeply effective solutions for sensitive, acne-prone, and dehydrated skin.",
+            "Laneige": "A world-renowned leader in water-science skincare. Laneige utilizes powerful, proprietary hydration technologies to lock in skin moisture and build incredibly plumper-looking skin barriers.",
+            "Anua": "Focused on pure organic formulations, Anua targets absolute skin soothing. Their ultra-famous Heartleaf toner lines aim directly at reducing skin irritation and managing perfect sebum levels.",
+            "Tamburins": "A premium, artistic niche fragrance house from Seoul. Tamburins delivers experimental scents and high-end aesthetic personal care products wrapped in sculptural container concepts.",
+            "Rom&nd": "The iconic global name in modern K-Beauty makeup. Rom&nd creates incredible, award-winning juicy lip tints and color palettes that deliver stunning glass-skin effects effortlessly."
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchProducts();
+            loadCartFromSession();
+        });
+
+        function fetchProducts() {
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(data => {
+                    allProducts = data;
+                    renderProducts();
+                    renderBestsellers();
+                })
+                .catch(err => {
+                    console.error("Error loading products:", err);
+                    document.getElementById('products-grid').innerHTML = `
+                        <div class="col-span-full text-center text-rose-500 text-xs py-8">
+                            Failed to load catalog. Please ensure you initialized the database using '/init-db' first.
+                        </div>
+                    `;
+                });
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = "";
+
+            const filtered = activeCategory === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === activeCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-stone-450 py-12 text-xs">No products found in this category.</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const heartIconClass = p.isLiked ? 'fa-solid text-rose-500' : 'fa-regular text-stone-400';
+                
+                // بررسی وجود عکس واقعی و مهار ابعاد آن در کارت 👇
+                let imageElement = '';
+                if (p.imageUrl && p.imageUrl !== 'images/products/default.jpg') {
+                    imageElement = `<img src="/static/${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover object-center rounded-xl transition duration-500 group-hover:scale-105">`;
+                } else {
+                    imageElement = `<i class="fa-solid ${p.imgIcon} text-4xl ${p.iconColor} group-hover:scale-110 transition duration-300"></i>`;
+                }
+
+                const card = `
+                    <div class="relative bg-white rounded-2xl p-5 border border-stone-100 hover:shadow-md transition duration-300 flex flex-col justify-between group">
+                        
+                        <button onclick="toggleLike(${p.db_id})" class="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-stone-100 hover:scale-110 transition">
+                            <i class="${heartIconClass} fa-heart"></i>
+                        </button>
+
+                        <div onclick="openDetailsModal(${p.db_id})" class="cursor-pointer">
+                            <div class="w-full h-40 ${p.bgColor} rounded-xl flex items-center justify-center mb-4 relative overflow-hidden">
+                                ${imageElement}
+                                ${p.bestSeller ? '<span class="absolute bottom-2 left-2 bg-stone-900 text-white text-[9px] px-2 py-0.5 rounded-md font-bold tracking-widest">BESTSELLER</span>' : ''}
+                            </div>
+
+                            <span class="text-[9px] uppercase tracking-widest text-stone-400 font-bold">${p.brand}</span>
+                            <h3 class="text-stone-850 font-semibold text-xs mt-1 leading-tight mb-2">${p.name}</h3>
+                            
+                            <div class="flex items-center gap-0.5 mb-4">
+                                ${Array(5).fill(0).map((_, i) => `
+                                    <i class="fa-solid fa-star text-[10px] ${i < p.rating ? 'text-amber-400' : 'text-stone-200'}"></i>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-stone-50">
+                            <span class="text-stone-900 font-bold text-sm">$${p.price.toFixed(2)}</span>
+                            <div class="flex gap-2">
+                                <button onclick="addToCart(${p.db_id})" class="bg-stone-900 text-white w-7 h-7 rounded-lg flex items-center justify-center hover:bg-stone-850 transition text-xs">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                                <button onclick="openDetailsModal(${p.db_id})" class="text-[10px] uppercase tracking-widest text-stone-400 font-bold hover:text-stone-700 transition">Details</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function renderBestsellers() {
+            const grid = document.getElementById('bestsellers-grid');
+            grid.innerHTML = "";
+            const bests = allProducts.filter(p => p.bestSeller).slice(0, 4);
+
+            bests.forEach(p => {
+                // بررسی وجود عکس واقعی و مهار ابعاد آن در بخش پرفروش‌ها 👇
+                let imageElement = '';
+                if (p.imageUrl && p.imageUrl !== 'images/products/default.jpg') {
+                    imageElement = `<img src="/static/${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover object-center rounded-xl transition duration-500 group-hover:scale-105">`;
+                } else {
+                    imageElement = `<i class="fa-solid ${p.imgIcon} text-4xl ${p.iconColor} group-hover:scale-115 transition duration-300"></i>`;
+                }
+
+                const card = `
+                    <div class="bg-amber-50/20 border border-amber-100 rounded-2xl p-5 hover:shadow-xs transition duration-300 flex flex-col justify-between group">
+                        <div onclick="openDetailsModal(${p.db_id})" class="cursor-pointer">
+                            <div class="w-full h-40 ${p.bgColor} rounded-xl flex items-center justify-center mb-4 relative overflow-hidden">
+                                ${imageElement}
+                                <span class="absolute top-2 left-2 bg-amber-600 text-white text-[8px] px-2 py-0.5 rounded-md font-bold tracking-widest">HOT PICK</span>
+                            </div>
+                            <span class="text-[9px] uppercase tracking-widest text-stone-400 font-bold">${p.brand}</span>
+                            <h3 class="text-stone-850 font-bold text-xs mt-1 leading-tight mb-2">${p.name}</h3>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-stone-100">
+                            <span class="text-stone-900 font-bold text-sm">$${p.price.toFixed(2)}</span>
+                            <button onclick="addToCart(${p.db_id})" class="bg-stone-900 text-white px-3 py-1.5 rounded-lg hover:bg-stone-800 transition text-[10px] font-bold uppercase tracking-wider">
+                                Add To Bag
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        // Cart Drawer Logic
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-overlay');
+            drawer.classList.toggle('translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function addToCart(productId) {
+            const product = allProducts.find(p => p.db_id === productId);
+            if (!product) return;
+
+            const existing = cart.find(item => item.product.db_id === productId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ product, quantity: 1 });
+            }
+
+            saveCartToSession();
+            updateCartUI();
+            
+            // Show badge notification logic
+            const badge = document.getElementById('cart-badge');
+            badge.classList.remove('hidden');
+            
+            // Auto opens drawer to give clear confirmation feedback
+            toggleCart();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.product.db_id !== productId);
+            saveCartToSession();
+            updateCartUI();
+        }
+
+        function changeQty(productId, delta) {
+            const existing = cart.find(item => item.product.db_id === productId);
+            if (existing) {
+                existing.quantity += delta;
+                if (existing.quantity <= 0) {
+                    removeFromCart(productId);
+                    return;
+                }
+            }
+            saveCartToSession();
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const badge = document.getElementById('cart-badge');
+            const totalSpan = document.getElementById('cart-total');
+
+            container.innerHTML = "";
+            let total = 0;
+            let totalQty = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-stone-400 space-y-2">
+                        <i class="fa-regular fa-folder-open text-3xl"></i>
+                        <p class="text-xs">Your shopping bag is empty.</p>
+                    </div>
+                `;
+                badge.classList.add('hidden');
+                totalSpan.innerText = "$0.00";
+                return;
+            }
+
+            cart.forEach(item => {
+                total += item.product.price * item.quantity;
+                totalQty += item.quantity;
+
+                // رندر عکس واقعی محصول در لیست سبد خرید 👇
+                let cartImageHTML = '';
+                if (item.product.imageUrl && item.product.imageUrl !== 'images/products/default.jpg') {
+                    cartImageHTML = `<img src="/static/${item.product.imageUrl}" alt="${item.product.name}" class="w-full h-full object-cover rounded-lg">`;
+                } else {
+                    cartImageHTML = `<i class="fa-solid ${item.product.imgIcon}"></i>`;
+                }
+
+                const itemHTML = `
+                    <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl border border-stone-100">
+                        <div class="w-12 h-12 rounded-lg ${item.product.bgColor} flex items-center justify-center text-lg ${item.product.iconColor} overflow-hidden">
+                            ${cartImageHTML}
+                        </div>
+                        <div class="flex-1 text-left min-w-0">
+                            <h4 class="text-xs font-bold text-stone-800 truncate">${item.product.name}</h4>
+                            <p class="text-[10px] text-stone-400 font-semibold">${item.product.brand} | $${item.product.price.toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeQty(${item.product.db_id}, -1)" class="w-5 h-5 bg-stone-200 hover:bg-stone-300 rounded text-xs">-</button>
+                            <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
+                            <button onclick="changeQty(${item.product.db_id}, 1)" class="w-5 h-5 bg-stone-200 hover:bg-stone-300 rounded text-xs">+</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+
+            badge.innerText = totalQty;
+            badge.classList.remove('hidden');
+            totalSpan.innerText = `$${total.toFixed(2)}`;
+        }
+
+        function saveCartToSession() {
+            localStorage.setItem('surik_cart', JSON.stringify(cart));
+        }
+
+        function loadCartFromSession() {
+            const saved = localStorage.getItem('surik_cart');
+            if (saved) {
+                cart = JSON.parse(saved);
+                updateCartUI();
+            }
+        }
+
+        function checkoutOrder() {
+            if (cart.length === 0) {
+                alert("Your shopping bag is empty! Add products before checking out.");
+                return;
+            }
+            alert("Thank you! Your order has been placed successfully in the SuriK-Glow system.");
+            cart = [];
+            saveCartToSession();
+            updateCartUI();
+            toggleCart();
+        }
+
+        // Product Details Modal Dialog
+        function openDetailsModal(productId) {
+            const p = allProducts.find(prod => prod.db_id === productId);
+            if (!p) return;
+
+            // پر کردن بخش ظاهری مودال
+            const visual = document.getElementById('modal-visual');
+            visual.className = `w-full h-56 rounded-2xl flex items-center justify-center relative ${p.bgColor} overflow-hidden`;
+            
+            const modalImg = document.getElementById('modal-product-img');
+            const icon = document.getElementById('modal-icon');
+
+            // سوییچ بین عکس واقعی و آیکون پیش‌فرض 👇
+            if (p.imageUrl && p.imageUrl !== 'images/products/default.jpg') {
+                modalImg.src = `/static/${p.imageUrl}`;
+                modalImg.classList.remove('hidden');
+                icon.classList.add('hidden');
+            } else {
+                modalImg.classList.add('hidden');
+                icon.className = `fa-solid ${p.imgIcon} text-5xl ${p.iconColor}`;
+                icon.classList.remove('hidden');
+            }
+
+            const bBadge = document.getElementById('modal-bestseller-badge');
+            if (p.bestSeller) bBadge.classList.remove('hidden');
+            else bBadge.classList.add('hidden');
+
+            document.getElementById('modal-price').innerText = `$${p.price.toFixed(2)}`;
+            
+            const addBtn = document.getElementById('modal-add-btn');
+            addBtn.onclick = () => {
+                addToCart(p.db_id);
+                closeDetailsModal();
+            };
+
+            // پر کردن فیلدهای متنی
+            document.getElementById('modal-brand').innerText = p.brand;
+            document.getElementById('modal-name').innerText = p.name;
+            document.getElementById('modal-ideal').innerText = p.idealFor;
+            document.getElementById('modal-benefits').innerText = p.benefits;
+            document.getElementById('modal-ingredients').innerText = p.ingredients;
+
+            const stars = document.getElementById('modal-stars');
+            stars.innerHTML = Array(5).fill(0).map((_, i) => `
+                <i class="fa-solid fa-star text-[11px] ${i < p.rating ? 'text-amber-400' : 'text-stone-200'}"></i>
+            `).join('');
+
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('details-modal').classList.add('hidden');
+            // پاکسازی آدرس تصویر هنگام بستن مودال برای جلوگیری از پرش تصویر 👇
+            document.getElementById('modal-product-img').src = "";
+        }
+
+        // Brand Info Modal Dialog
+        function showBrandInfo(brandName) {
+            const title = document.getElementById('brand-title');
+            const desc = document.getElementById('brand-desc');
+            
+            title.innerText = brandName;
+            desc.innerText = brandDescriptions[brandName] || "A highly respected and premium manufacturer from Seoul, creating high-quality, effective cosmetic lines popular all over the world.";
+
+            document.getElementById('brand-modal').classList.remove('hidden');
+        }
+
+        function closeBrandModal() {
+            document.getElementById('brand-modal').classList.add('hidden');
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            
+            document.querySelectorAll('#category-filters button').forEach(btn => {
+                btn.classList.remove('bg-stone-900', 'text-white');
+                btn.classList.add('bg-white', 'text-stone-500', 'border', 'border-stone-200');
+            });
+
+            // پیدا کردن دکمه فعال فعلی
+            const activeBtn = Array.from(document.querySelectorAll('#category-filters button')).find(btn => 
+                btn.getAttribute('onclick').includes(`'${cat}'`)
+            );
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-stone-500', 'border', 'border-stone-200');
+                activeBtn.classList.add('bg-stone-900', 'text-white');
+            }
+
+            renderProducts();
+        }
+
+        function toggleLike(productId) {
+            fetch(`/api/favorite/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (res.status === 401) {
+                    alert('Please log in first to save products to your personal favorites.');
+                    window.location.href = '/login';
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.success) {
+                    fetchProducts();
+                }
+            })
+            .catch(err => console.error("Error favoring product:", err));
+        }
+    </script>
+</body>
+</html>
