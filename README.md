@@ -40,6 +40,6 @@ SuriK-Glow is a modern, responsive web application dedicated to showcasing and r
  2. **Run the Application:**
      ```bash
    python app.py
-
+```
    
    Open http://127.0.0.1:5000 in your web browser.
